@@ -1,0 +1,20 @@
+global:
+  domain: fastboot.internal
+
+platform:
+  stage: onprem
+
+operator:
+  deployment:
+    replicas: 3
+
+api:
+  deployment:
+    replicas: 3
+
+  service:
+    type: LoadBalancer
+
+  ingress:
+    host: api.fastboot.internal
+    ingressClassName: nginx

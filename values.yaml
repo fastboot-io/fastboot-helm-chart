@@ -1,0 +1,74 @@
+appName: fastboot
+
+global:
+  domain: fastboot.com
+
+platform:
+  name: fastboot-idp
+  stage: prod
+  version: 1.0.0
+  databaseDefaults:
+    storageClass: local-path
+    sizes:
+      SMALL:
+        storage: 5Gi
+        cpu: 250m
+        memory: 512Mi
+      MEDIUM:
+        storage: 10Gi
+        cpu: 500m
+        memory: 1Gi
+      LARGE:
+        storage: 50Gi
+        cpu: 1000m
+        memory: 2Gi
+
+platformServices:
+  databases: []
+
+artifactory:
+  enabled: true
+  secretName: artifactory-secret
+
+rbac:
+  serviceAccountName: fastboot-sa
+  clusterRoleName: fastboot-role
+  clusterRoleBindingName: fastboot-role-binding
+
+operator:
+  image:
+    repository: ghcr.io/fastboot-io/fastboot-idp
+    tag: 1.0.0
+    pullPolicy: IfNotPresent
+
+  deployment:
+    name: fastboot-operator
+    appName: fastboot-operator
+    replicas: 1
+    port: 8080
+    selectorLabel: fastboot-operator
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "200Mi"
+      limits:
+        cpu: "500m"
+        memory: "500Mi"
+    env:
+      - name: KUBERNETES_NAMESPACE
+        valueFrom:
+          fieldRef:
+            fieldPath: metadata.namespace
+      - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
+        value: "INFO"
+
+  service:
+    name: fastboot-rest-api-service
+    type: ClusterIP
+    port: 8080
+    targetPort: 8080
+
+  ingress:
+    name: fastboot-rest-api-ingress
+    host: api.fastboot.com
+    ingressClassName: nginx

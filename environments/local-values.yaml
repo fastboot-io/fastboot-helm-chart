@@ -1,0 +1,16 @@
+global:
+  domain: fastboot.local
+
+platform:
+  stage: local
+
+artifactory:
+  enabled: false
+
+operator:
+  service:
+    type: LoadBalancer
+
+  ingress:
+    host: api.fastboot.local
+    ingressClassName: traefik

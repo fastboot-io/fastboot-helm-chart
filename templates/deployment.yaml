@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.operator.deployment.name }}
+  labels:
+    app.kubernetes.io/name: {{ .Values.operator.deployment.appName }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.operator.deployment.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.operator.deployment.selectorLabel }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.operator.deployment.selectorLabel }}
+    spec:
+      {{- if and .Values.artifactory.enabled .Values.artifactory.secretName }}
+      imagePullSecrets:
+        - name: {{ .Values.artifactory.secretName }}
+      {{- end }}
+      serviceAccountName: {{ .Values.rbac.serviceAccountName }}
+      containers:
+        - name: {{ .Values.operator.deployment.selectorLabel }}
+          image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"
+          imagePullPolicy: {{ .Values.operator.image.pullPolicy }}
+          securityContext:
+            allowPrivilegeEscalation: false
+            runAsNonRoot: true
+            runAsUser: 1000
+            capabilities:
+              drop: ["ALL"]
+          ports:
+            - containerPort: {{ .Values.operator.deployment.port }}
+              name: http
+              protocol: TCP
+          {{- if .Values.operator.deployment.env }}
+          env:
+          {{- range .Values.operator.deployment.env }}
+          - name: {{ .name }}
+            {{- if .value }}
+            value: {{ .value | quote }}
+            {{- else if .valueFrom }}
+            valueFrom:
+              {{- if .valueFrom.fieldRef }}
+              fieldRef:
+                fieldPath: {{ .valueFrom.fieldRef.fieldPath }}
+              {{- else if .valueFrom.secretKeyRef }}
+              secretKeyRef:
+                name: {{ .valueFrom.secretKeyRef.name }}
+                key: {{ .valueFrom.secretKeyRef.key }}
+                {{- if .valueFrom.secretKeyRef.optional }}
+                optional: {{ .valueFrom.secretKeyRef.optional }}
+                {{- end }}
+              {{- else if .valueFrom.configMapKeyRef }}
+              configMapKeyRef:
+                name: {{ .valueFrom.configMapKeyRef.name }}
+                key: {{ .valueFrom.configMapKeyRef.key }}
+                {{- if .valueFrom.configMapKeyRef.optional }}
+                optional: {{ .valueFrom.configMapKeyRef.optional }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
+          livenessProbe:
+            httpGet:
+              path: /actuator/health/liveness
+              port: {{ .Values.operator.deployment.port }}
+              scheme: HTTP
+            initialDelaySeconds: 30
+            periodSeconds: 10
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          readinessProbe:
+            httpGet:
+              path: /actuator/health/readiness
+              port: {{ .Values.operator.deployment.port }}
+              scheme: HTTP
+            initialDelaySeconds: 20
+            periodSeconds: 10
+            timeoutSeconds: 10
+            successThreshold: 1
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: {{ .Values.operator.deployment.resources.requests.cpu }}
+              memory: {{ .Values.operator.deployment.resources.requests.memory }}
+            limits:
+              cpu: {{ .Values.operator.deployment.resources.limits.cpu }}
+              memory: {{ .Values.operator.deployment.resources.limits.memory }}
