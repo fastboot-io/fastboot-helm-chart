@@ -57,7 +57,7 @@ helm repo update
 #### Step 2.3) Install the chart
 
 ~~~bash
-helm install fastboot fastboot/fastboot-idp-helm-chart
+helm install fastboot fastboot/fastboot-idp-helm-chart -n fastboot
 ~~~
 
 ## ⚙️ Configuration
