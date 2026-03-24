@@ -37,7 +37,7 @@ rbac:
 
 operator:
   image:
-    repository: ghcr.io/fastboot-io/fastboot-idp
+    repository: ghcr.io/fastboot-io/fastboot
     tag: 1.0.0
     pullPolicy: IfNotPresent
 
