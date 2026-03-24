@@ -24,19 +24,41 @@ This chart installs:
 
 ## 📥 Installation
 
-### 1. Add registry (if using OCI)
+### Option 1) Using OCI
+
+#### Step 1.1) Add registry
 
 ```bash
 helm registry login ghcr.io -u <your-username>
 ```
 
-### 2. Install the chart
+#### Step 1.2) Install the chart
 
 ```bash
-helm install fastboot oci://ghcr.io/fastboot-io/fastboot-idp-helm-chart --set artifactory.enabled=false -n fastboot
+helm install fastboot oci://ghcr.io/fastboot-io/fastboot-helm-chart --set artifactory.enabled=false -n fastboot
 ```
 
 ---
+
+### Option 2) Helm Repo
+
+#### Step 2.1) Add repo
+
+~~~bash
+helm repo add fastboot https://fastboot-io.github.io/fastboot-helm-chart
+~~~
+
+#### Step 2.2) Update repo (Optional)
+
+~~~bash
+helm repo update
+~~~
+
+#### Step 2.3) Install the chart
+
+~~~bash
+helm install fastboot fastboot/fastboot-idp-helm-chart
+~~~
 
 ## ⚙️ Configuration
 
@@ -45,7 +67,7 @@ You can override values using** **`values.yaml` or** **`--set`.
 ### Example:
 
 ```bash
-helm install fastboot oci://ghcr.io/fastboot-io/fastboot-idp-helm-chart \
+helm install fastboot oci://ghcr.io/fastboot-io/fastboot-helm-chart \
   --set artifactory.enabled=false \
   --set image.tag=1.0.0 \
   --set service.port=8080 -n fastboot
@@ -83,7 +105,7 @@ existingSecret: artifactory-secret
 ## 🔄 Upgrading
 
 ```bash
-helm upgrade fastboot oci://ghcr.io/fastboot-io/fastboot-idp-helm-chart -n fastboot
+helm upgrade fastboot oci://ghcr.io/fastboot-io/fastboot-helm-chart -n fastboot
 ```
 
 ---
