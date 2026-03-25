@@ -30,25 +30,8 @@ jobs:
         with:
           version: v1.6.0
 
-      # Create GitHub release + upload chart
+      # FIX: Use action directly (no manual cr commands)
       - name: Run chart-releaser
+        uses: helm/chart-releaser-action@v1.6.0
         env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: |
-          cr release \
-            --owner ${{ github.repository_owner }} \
-            --repo $(basename ${{ github.repository }}) \
-            --charts-dir . \
-            --skip-existing
-
-      # Update gh-pages index.yaml
-      - name: Update Helm repo index
-        env:
-          CR_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: |
-          cr index \
-            --owner ${{ github.repository_owner }} \
-            --repo $(basename ${{ github.repository }}) \
-            --charts-dir . \
-            --index-path index.yaml \
-            --push
+          CR_TOKEN: ${{ secrets.GITHUB_TOKEN }}
