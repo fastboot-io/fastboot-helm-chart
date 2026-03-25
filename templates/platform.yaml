@@ -10,14 +10,14 @@ spec:
 
   defaults:
     database:
-      storageClass: {{ .Values.platform.databaseDefaults.storageClass }}
+      storageClass: {{ .Values.platform.defaults.database.storageClass }}
       sizes:
-      {{ toYaml .Values.platform.databaseDefaults.sizes | nindent 8 }}
+      {{ toYaml .Values.platform.defaults.database.sizes | nindent 8 }}
 
   services:
     databases:
-    {{- if .Values.platformServices.databases }}
-    {{- range .Values.platformServices.databases }}
+    {{- if .Values.platform.services.databases }}
+    {{- range .Values.platform.services.databases }}
       - name: {{ .name }}
         engine: {{ .engine }}
         version: {{ .version | quote }}

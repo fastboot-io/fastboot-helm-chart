@@ -19,7 +19,7 @@ spec:
       imagePullSecrets:
         - name: {{ .Values.artifactory.secretName }}
       {{- end }}
-      serviceAccountName: {{ .Values.rbac.serviceAccountName }}
+      serviceAccountName: {{ .Values.operator.rbac.serviceAccountName }}
       containers:
         - name: {{ .Values.operator.deployment.selectorLabel }}
           image: "{{ .Values.operator.image.repository }}:{{ .Values.operator.image.tag }}"

@@ -8,6 +8,10 @@ artifactory:
   enabled: false
 
 operator:
+  image:
+    repository: fastboot
+    tag: local
+    pullPolicy: Never
   service:
     type: LoadBalancer
 

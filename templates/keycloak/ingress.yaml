@@ -1,0 +1,18 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ .Values.platform.auth.provider }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  ingressClassName: {{ .Values.operator.ingress.ingressClassName }}
+  rules:
+    - host: keycloak.fastboot.io
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ .Values.platform.auth.provider }}
+                port:
+                  number: {{ .Values.platform.auth.port }}

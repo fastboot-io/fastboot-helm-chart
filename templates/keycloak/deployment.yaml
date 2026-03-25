@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.platform.auth.provider }}
+  namespace: {{ .Release.Namespace }}
+spec:
+  replicas: {{ .Values.platform.auth.replicas }}
+  selector:
+    matchLabels:
+      app: {{ .Values.platform.auth.provider }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.platform.auth.provider }}
+    spec:
+      containers:
+        - name: {{ .Values.platform.auth.provider }}
+          image: "{{ .Values.platform.auth.image }}:{{ .Values.platform.auth.tag }}"
+          args: ["start-dev", "--import-realm"]
+          ports:
+            - containerPort: {{ .Values.platform.auth.port }}
+          {{- if .Values.platform.auth.env }}
+          env:
+          {{- range .Values.platform.auth.env }}
+          - name: {{ .name }}
+            {{- if .value }}
+            value: {{ .value | quote }}
+            {{- else if .valueFrom }}
+            valueFrom:
+              {{- if .valueFrom.fieldRef }}
+              fieldRef:
+                fieldPath: {{ .valueFrom.fieldRef.fieldPath }}
+              {{- else if .valueFrom.secretKeyRef }}
+              secretKeyRef:
+                name: {{ .valueFrom.secretKeyRef.name }}
+                key: {{ .valueFrom.secretKeyRef.key }}
+                {{- if .valueFrom.secretKeyRef.optional }}
+                optional: {{ .valueFrom.secretKeyRef.optional }}
+                {{- end }}
+              {{- else if .valueFrom.configMapKeyRef }}
+              configMapKeyRef:
+                name: {{ .valueFrom.configMapKeyRef.name }}
+                key: {{ .valueFrom.configMapKeyRef.key }}
+                {{- if .valueFrom.configMapKeyRef.optional }}
+                optional: {{ .valueFrom.configMapKeyRef.optional }}
+                {{- end }}
+              {{- end }}
+            {{- end }}
+          {{- end }}
+          {{- end }}
+          volumeMounts:
+            - name: realm-config
+              mountPath: /opt/keycloak/data/import
+      volumes:
+        - name: realm-config
+          configMap:
+            name: keycloak-realm
