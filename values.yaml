@@ -1,41 +1,53 @@
 appName: fastboot
 
 global:
-  domain: fastboot.com
-
-platform:
-  name: fastboot-idp
-  stage: prod
-  version: 1.0.0
-  databaseDefaults:
-    storageClass: local-path
-    sizes:
-      SMALL:
-        storage: 5Gi
-        cpu: 250m
-        memory: 512Mi
-      MEDIUM:
-        storage: 10Gi
-        cpu: 500m
-        memory: 1Gi
-      LARGE:
-        storage: 50Gi
-        cpu: 1000m
-        memory: 2Gi
-
-platformServices:
-  databases: []
+  domain: fastboot.io
 
 artifactory:
   enabled: true
   secretName: artifactory-secret
 
-rbac:
-  serviceAccountName: fastboot-sa
-  clusterRoleName: fastboot-role
-  clusterRoleBindingName: fastboot-role-binding
+platform:
+  name: fastboot-idp
+  stage: prod
+  version: 1.0.0
+  auth:
+    enabled: true
+    provider: keycloak
+    replicas: 1
+    port: 8080
+    image: quay.io/keycloak/keycloak
+    tag: 24.0.3
+    env:
+      - name: KEYCLOAK_ADMIN
+        value: admin
+      - name: KEYCLOAK_ADMIN_PASSWORD
+        value: admin
+  defaults:
+    database:
+      storageClass: local-path
+      sizes:
+        SMALL:
+          storage: 5Gi
+          cpu: 250m
+          memory: 512Mi
+        MEDIUM:
+          storage: 10Gi
+          cpu: 500m
+          memory: 1Gi
+        LARGE:
+          storage: 50Gi
+          cpu: 1000m
+          memory: 2Gi
+  services:
+    databases: []
 
 operator:
+  rbac:
+    serviceAccountName: fastboot-sa
+    clusterRoleName: fastboot-role
+    clusterRoleBindingName: fastboot-role-binding
+
   image:
     repository: ghcr.io/fastboot-io/fastboot
     tag: 1.0.0
@@ -45,7 +57,7 @@ operator:
     name: fastboot-operator
     appName: fastboot-operator
     replicas: 1
-    port: 8080
+    port: 8081
     selectorLabel: fastboot-operator
     resources:
       requests:
@@ -65,10 +77,10 @@ operator:
   service:
     name: fastboot-rest-api-service
     type: ClusterIP
-    port: 8080
-    targetPort: 8080
+    port: 8081
+    targetPort: 8081
 
   ingress:
     name: fastboot-rest-api-ingress
-    host: api.fastboot.com
+    host: api.fastboot.io
     ingressClassName: nginx
