@@ -24,12 +24,6 @@ jobs:
       - name: Package Helm chart
         run: helm package ./
 
-      # Install chart-releaser
-      - name: Install chart-releaser
-        uses: helm/chart-releaser-action@v1.6.0
-        with:
-          version: v1.6.0
-
       # FIX: Use action directly (no manual cr commands)
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
