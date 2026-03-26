@@ -10,42 +10,49 @@ jobs:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write
-      packages: write
+      contents: write   # needed to push to gh-pages
+      packages: write   # needed to push to GHCR
 
     steps:
       - name: Checkout repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
-      # Install Helm
       - name: Set up Helm
         uses: azure/setup-helm@v4
 
-      # ✅ FIX: correct path
+      # Get version from Chart.yaml
       - name: Get chart version
+        id: chart_version
         run: |
           VERSION=$(grep '^version:' charts/fastboot-helm-chart/Chart.yaml | awk '{print $2}')
           echo "VERSION=$VERSION" >> $GITHUB_ENV
           echo "Chart version is $VERSION"
 
-      # ✅ FIX: correct packaging path
-      - name: Package Helm chart
+      # ---------------------------
+      # 1) Publish to OCI (GHCR)
+      # ---------------------------
+      - name: Package Helm chart for OCI
         run: |
-          helm package charts/fastboot-helm-chart
+          mkdir -p dist
+          helm package charts/fastboot-helm-chart --destination dist
 
-      # ---------------------------
-      # 🟢 Push to OCI (GHCR)
-      # ---------------------------
-      - name: Login to GHCR
+      - name: Login to GHCR (Helm registry)
         run: echo "${{ secrets.GHCR_PAT }}" | helm registry login ghcr.io -u ${{ github.actor }} --password-stdin
 
       - name: Push Helm chart to OCI
         run: |
-          helm push fastboot-helm-chart-${{ env.VERSION }}.tgz oci://ghcr.io/fastboot-io
+          helm push dist/fastboot-helm-chart-${{ env.VERSION }}.tgz oci://ghcr.io/fastboot-io
 
       # ---------------------------
-      # 🔵 Publish to gh-pages
+      # 2) Publish to gh-pages via chart-releaser
       # ---------------------------
+      - name: Configure git user
+        run: |
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+
       - name: Run chart-releaser
         uses: helm/chart-releaser-action@v1.6.0
         with:
