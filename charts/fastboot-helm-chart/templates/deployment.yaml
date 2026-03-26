@@ -65,24 +65,24 @@ spec:
           {{- end }}
           livenessProbe:
             httpGet:
-              path: /actuator/health/liveness
+              path: {{ .Values.operator.deployment.livenessProbe.path }}
               port: {{ .Values.operator.deployment.port }}
-              scheme: HTTP
-            initialDelaySeconds: 30
-            periodSeconds: 10
-            timeoutSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
+              scheme: {{ .Values.operator.deployment.livenessProbe.scheme }}
+            initialDelaySeconds: {{ .Values.operator.deployment.livenessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.operator.deployment.livenessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.operator.deployment.livenessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.operator.deployment.livenessProbe.successThreshold }}
+            failureThreshold: {{ .Values.operator.deployment.livenessProbe.failureThreshold }}
           readinessProbe:
             httpGet:
-              path: /actuator/health/readiness
+              path: {{ .Values.operator.deployment.readinessProbe.path }}
               port: {{ .Values.operator.deployment.port }}
-              scheme: HTTP
-            initialDelaySeconds: 20
-            periodSeconds: 10
-            timeoutSeconds: 10
-            successThreshold: 1
-            failureThreshold: 3
+              scheme: {{ .Values.operator.deployment.readinessProbe.scheme }}
+            initialDelaySeconds: {{ .Values.operator.deployment.readinessProbe.initialDelaySeconds }}
+            periodSeconds: {{ .Values.operator.deployment.readinessProbe.periodSeconds }}
+            timeoutSeconds: {{ .Values.operator.deployment.readinessProbe.timeoutSeconds }}
+            successThreshold: {{ .Values.operator.deployment.readinessProbe.successThreshold }}
+            failureThreshold: {{ .Values.operator.deployment.readinessProbe.failureThreshold }}
           resources:
             requests:
               cpu: {{ .Values.operator.deployment.resources.requests.cpu }}

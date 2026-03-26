@@ -59,13 +59,6 @@ operator:
     replicas: 1
     port: 8081
     selectorLabel: fastboot-operator
-    resources:
-      requests:
-        cpu: "100m"
-        memory: "200Mi"
-      limits:
-        cpu: "500m"
-        memory: "500Mi"
     env:
       - name: KUBERNETES_NAMESPACE
         valueFrom:
@@ -73,6 +66,29 @@ operator:
             fieldPath: metadata.namespace
       - name: LOGGING_LEVEL_ORG_SPRINGFRAMEWORK_WEB
         value: "INFO"
+    livenessProbe:
+      path: /actuator/health/liveness
+      scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+    readinessProbe:
+      path: /actuator/health/readiness
+      scheme: HTTP
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      timeoutSeconds: 10
+      successThreshold: 1
+      failureThreshold: 3
+    resources:
+      requests:
+        cpu: "100m"
+        memory: "200Mi"
+      limits:
+        cpu: "500m"
+        memory: "500Mi"
 
   service:
     name: fastboot-rest-api-service
